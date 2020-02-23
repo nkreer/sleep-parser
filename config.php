@@ -2,8 +2,10 @@
 
 // Configuration for the parser
 
-// Should the utility include noise events in the export?
-define("INCLUDE_NOISE_EVENTS", false);
+// Ignore certain events in the export
+define("IGNORE_EVENTS", [
+    "DHA"
+]);
 
 // Newest recordings are saved last
 define("ASCENDING_ORDER", true);

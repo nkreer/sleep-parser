@@ -25,7 +25,7 @@ $rawData = explode("\n", $rawData);
 // For each recording, there are three lines stored
 // Line 1: Headings and definitions of the values
 // Line 2: Sleep events
-// Line 3: currently unknown
+// Line 3: currently unknown, I assume this to be graph values
 // Parse out slices of three lines to work with
 $currentSlice = [];
 $slicedData = [];
@@ -55,11 +55,28 @@ foreach($slicedData as $slice){
             $data[$title] = $slice[1][$titleKey];
         } elseif($title === "Event") {
             // Handle things differently as we have an event with more data
-            // TODO
-            $data["events"][] = $slice[1][$titleKey];
+            $eventData = explode("-", $slice[1][$titleKey], 3);
+
+            // Only save if event is not ignored by the user
+            if(!in_array($eventData[0], IGNORE_EVENTS)){
+                $event = [
+                    "title" => $eventData[0],
+                    "time" => $eventData[1],
+                    "humanTime" => date("Y-m-d H:i:s", ($eventData[1] / 1000))
+                ];
+    
+                // Save additional data if it is available
+                if(!empty($eventData[2])){
+                    $event["data"] = $eventData[2];
+                }
+    
+                $data["events"][] = $event;
+            }
         } else {
             // Working with sensor readings from a given time
-            $data["readings"][$title] = [
+            // Also silence this operation as not all values are initialized.
+            // PHP will simply write null in that case
+            @$data["readings"][$title] = [
                 $slice[1][$titleKey],
                 $slice[2][$titleKey]
             ];
