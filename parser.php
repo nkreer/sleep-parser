@@ -67,7 +67,7 @@ foreach($slicedData as $slice){
     
                 // Save additional data if it is available
                 if(!empty($eventData[2])){
-                    $event["data"] = $eventData[2];
+                    $event["noise"] = $eventData[2];
                 }
     
                 $data["events"][] = $event;
@@ -77,8 +77,8 @@ foreach($slicedData as $slice){
             // Also silence this operation as not all values are initialized.
             // PHP will simply write null in that case
             @$data["readings"][$title] = [
-                $slice[1][$titleKey],
-                $slice[2][$titleKey]
+                "accelerometric" => $slice[1][$titleKey],
+                "noise" => $slice[2][$titleKey]
             ];
         }
     }
