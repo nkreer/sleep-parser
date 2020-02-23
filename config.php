@@ -10,6 +10,23 @@ define("IGNORE_EVENTS", [
 // Newest recordings are saved last
 define("ASCENDING_ORDER", true);
 
+
+// Convert timestamps into unix time while converting?
+define("ENABLE_TIMESTAMP_CONVERSION", true);
+// If true, for which fields?
+define("TIMESTAMP_CONVERSION_FIELDS", [
+    "From",
+    "To",
+    "Sched"
+]);
+// Format of the strings to convert?
+// The default here is how dates are expressed by SaA when the timezone is Europe/Berlin
+define("TIME_STRING_FORMAT", "d. m. Y H:i");
+// Retain a human-readble version of the time?
+define("RETAIN_HUMAN_READABLE_TIME", true);
+// Human readble time format
+define("HUMAN_READABLE_TIME_FORMAT", DATE_ATOM);
+
 // -- TECHNICAL --
 // Normally, there is no need to change these options
 

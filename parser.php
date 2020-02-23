@@ -52,7 +52,27 @@ foreach($slicedData as $slice){
     foreach($titles as $titleKey => $title){
         // We're dealing with one of the direct values, just save them
         if(in_array($title, ONE_VALUE_COLUMNS)){
-            $data[$title] = $slice[1][$titleKey];
+            // Check if this is a field for time and parse that
+            if(ENABLE_TIMESTAMP_CONVERSION and in_array($title, TIMESTAMP_CONVERSION_FIELDS)){
+                // Get the timezone for the conversion
+                // This will always be id 1 (element 2) on the arrays
+                $timezone = $slice[1][1];
+                $time = date_create_from_format
+                (
+                    TIME_STRING_FORMAT, 
+                    $slice[1][$titleKey], 
+                    new DateTimeZone($timezone)
+                );
+                // Get the unix timestamp
+                $data[$title] = $time->getTimestamp();
+                // Also save a human readable version if requested
+                if(RETAIN_HUMAN_READABLE_TIME){
+                    $data[$title."Human"] = $time->format(HUMAN_READABLE_TIME_FORMAT);
+                }
+            } else {
+                // Just save what came out of SaA
+                $data[$title] = $slice[1][$titleKey];
+            }
         } elseif($title === "Event") {
             // Handle things differently as we have an event with more data
             $eventData = explode("-", $slice[1][$titleKey], 3);
@@ -61,13 +81,17 @@ foreach($slicedData as $slice){
             if(!in_array($eventData[0], IGNORE_EVENTS)){
                 $event = [
                     "title" => $eventData[0],
-                    "time" => $eventData[1],
-                    "humanTime" => date("Y-m-d H:i:s", ($eventData[1] / 1000))
+                    "time" => $eventData[1]
                 ];
+
+                // Save a human readble time if configured
+                if(RETAIN_HUMAN_READABLE_TIME){
+                    $event["humanTime"] = date(HUMAN_READABLE_TIME_FORMAT, ($eventData[1] / 1000));
+                }
     
                 // Save additional data if it is available
                 if(!empty($eventData[2])){
-                    $event["noise"] = $eventData[2];
+                    $event["data"] = $eventData[2];
                 }
     
                 $data["events"][] = $event;
@@ -87,7 +111,7 @@ foreach($slicedData as $slice){
     $parsedData[] = $data;
 }
 
-// Reverse the array if the user requested to do to
+// Reverse the array if the user requested to do so
 if(ASCENDING_ORDER){
     $parsedData = array_reverse($parsedData);
 }
